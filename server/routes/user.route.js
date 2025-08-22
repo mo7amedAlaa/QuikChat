@@ -6,7 +6,7 @@ import {
   login,
   checkAuth,
   updateUserProfile,
-} from "../controllers/user.controller.js";
+} from "../controllers/User.controller.js";
 
 userRouter.post("/signUp", signUp);
 userRouter.post("/login", login);
