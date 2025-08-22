@@ -11,37 +11,28 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Create HTTP server
+const server = http.createServer(app);
+
 // ========================
 // Middleware
 // ========================
-const allowedOrigins = ["https://quik-chat-frontend.vercel.app"]; // تأكد من وضع رابط الفرونت إند هنا
 app.use(
   cors({
-    origin: allowedOrigins,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   })
 );
-
-// Handle preflight requests
-app.options("*", cors());
-
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
-// ========================
-// HTTP server
-// ========================
-const server = http.createServer(app);
 
 // ========================
 // Socket.IO Setup
 // ========================
 export const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     methods: ["GET", "POST"],
-    credentials: true,
   },
 });
 
@@ -86,6 +77,7 @@ io.on("connection", (socket) => {
   console.log(`✅ User connected: ${userId}`);
   addUserSocket(userId, socket.id);
 
+  // broadcast online users
   io.emit("getOnlineUsers", getOnlineUsers());
 
   socket.on("disconnect", () => {
@@ -111,5 +103,4 @@ if (process.env.NODE_ENV !== "production") {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
   });
 }
-
 export default server;
