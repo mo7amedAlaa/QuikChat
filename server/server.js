@@ -11,28 +11,37 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Create HTTP server
-const server = http.createServer(app);
-
 // ========================
 // Middleware
 // ========================
+const allowedOrigins = [process.env.CLIENT_URL]; // تأكد من وضع رابط الفرونت إند هنا
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   })
 );
+
+// Handle preflight requests
+app.options("*", cors());
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// ========================
+// HTTP server
+// ========================
+const server = http.createServer(app);
 
 // ========================
 // Socket.IO Setup
 // ========================
 export const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -77,7 +86,6 @@ io.on("connection", (socket) => {
   console.log(`✅ User connected: ${userId}`);
   addUserSocket(userId, socket.id);
 
-  // broadcast online users
   io.emit("getOnlineUsers", getOnlineUsers());
 
   socket.on("disconnect", () => {
@@ -97,10 +105,9 @@ app.use("/api/messages", messageRouter);
 // ========================
 // Start Server
 // ========================
-if (process.env.NODE_ENV !== "production") {
-  server.listen(PORT, () => {
-    connectToDB();
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-  });
-}
+server.listen(PORT, () => {
+  connectToDB();
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});
+
 export default server;
