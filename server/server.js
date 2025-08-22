@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 // ========================
 // Middleware
 // ========================
-const allowedOrigins = [process.env.CLIENT_URL]; // تأكد من وضع رابط الفرونت إند هنا
+const allowedOrigins = ["https://quik-chat-frontend.vercel.app"]; // تأكد من وضع رابط الفرونت إند هنا
 app.use(
   cors({
     origin: allowedOrigins,
