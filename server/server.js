@@ -97,7 +97,9 @@ app.use("/api/messages", messageRouter);
 // ========================
 // Start Server
 // ========================
-server.listen(PORT, () => {
-  connectToDB();
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  server.listen(PORT, () => {
+    connectToDB();
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
+  });
+}
